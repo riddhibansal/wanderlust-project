@@ -64,7 +64,7 @@ app.get("/listings/new", (req, res) => {
 //SHOW ROUTE
 app.get("/listings/:id", async (req, res) => {
   let { id } = req.params;
-  const listing = await Listing.findById(id);
+  const listing = await Listing.findById(id).populate("reviews");
   res.render("listings/show.ejs", { listing });
 });
 
@@ -111,7 +111,7 @@ app.delete("/listings/:id", wrapAsync(async (req, res) => {
   res.redirect("/listings");
 }));
 
-//REVIEWS --- POST ROUTE
+//REVIEWS --- POST REVIEW ROUTE
 app.post("/listings/:id/reviews", async (req, res) => {
   let listing = await Listing.findById(req.params.id);
   let newReview = new Review(req.body.review);
@@ -123,7 +123,16 @@ app.post("/listings/:id/reviews", async (req, res) => {
   res.redirect(`/listings/${listing._id}`);
 });
 
+//DELETE REVIEW ROUTE
+app.delete("/listings/:id/reviews/:reviewId", wrapAsync(async(req, res)=>{
+  let {id, reviewId} = req.params;
 
+  await Listing.findByIdAndUpdate(id, {$pull: {reviews: reviewId}});
+  await Review.findByIdAndDelete(reviewId);
+
+  res.redirect(`/listings/${id}`);
+})
+);
 
 app.all("*", (req, res, next) => {
   next(new ExpressError(404, "Page not Found!"));
@@ -132,6 +141,7 @@ app.all("*", (req, res, next) => {
 //ERROR HANDLER MIDDLEWARE 
 app.use((err, req, res, next) => {
   let {statuscode=500, message="Something went wrong!"} = err;
+  console.log(err);
   res.render("error.ejs", { message });
   //res.status(statuscode).send(message);
 });
