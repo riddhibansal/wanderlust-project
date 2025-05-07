@@ -63,21 +63,12 @@ passport.deserializeUser(User.deserializeUser());
 
 
 app.use((req, res, next) => {
+  res.locals.currUser = req.user;
   res.locals.success = req.flash("success");
   res.locals.error = req.flash("error");
+
   next();
 });
-
- /* //DEMO USER 
-app.get("/demouser", async (req, res) => {
-  let fakeuser = new User({
-    email: "student@gmail.com",
-    username: "student"
-  });
-
-  let registereduser = await User.register(fakeuser, "helloworld");
-  res.send(registereduser);
-}); */
 
 app.use("/listings", listingRouter);
 app.use("/listings/:id/reviews", reviewRouter);
@@ -91,7 +82,6 @@ app.all("*", (req, res, next) => {
 app.use((err, req, res, next) => {
   let {statuscode=500, message="Something went wrong!"} = err;
   res.render("error.ejs", { message });
-  //res.status(statuscode).send(message);
 });
 
 app.listen(3000, () => {
