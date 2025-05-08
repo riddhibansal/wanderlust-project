@@ -44,7 +44,8 @@ router.post(
   }),
   async (req, res) => {
     req.flash("success", "Welcome back to Wanderlust! ");
-    res.redirect(res.locals.redirectUrl);
+    let redirectUrl = res.locals.redirectUrl || "/listings";
+    res.redirect(redirectUrl);
   }
 );
 
@@ -58,4 +59,4 @@ router.get("/logout", (req, res, next) => {
   });
 });
 
-module.exports = router;
+module.exports = router; 
