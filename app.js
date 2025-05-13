@@ -1,3 +1,7 @@
+require('dotenv').config();
+console.log(process.env.SECRET)
+
+
 const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
@@ -80,6 +84,7 @@ app.all("*", (req, res, next) => {
 
 //ERROR HANDLER MIDDLEWARE 
 app.use((err, req, res, next) => {
+  console.log(err);
   let {statuscode=500, message="Something went wrong!"} = err;
   res.render("error.ejs", { message });
 });
