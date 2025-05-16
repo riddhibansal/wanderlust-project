@@ -10,9 +10,8 @@ const listingSchema = new Schema({
     description: String,
     
     image: {
-        type: String,
-        default: "https://unsplash.com/photos/charming-white-buildings-with-colorful-doors-and-windows-WHqMp9uJt6g",
-        set: (v) => v === "" ? "https://unsplash.com/photos/charming-white-buildings-with-colorful-doors-and-windows-WHqMp9uJt6g" : v,
+        url: String,
+        filename: String
     },
     price: Number,
     location: String,
