@@ -95,8 +95,8 @@ app.all("*", (req, res, next) => {
 
 //ERROR HANDLER MIDDLEWARE 
 app.use((err, req, res, next) => {
-  let {statuscode=500, message="Something went wrong!"} = err;
-  res.render("error.ejs", { message });
+  let { statusCode = 500, message = "Something went wrong!" } = err;
+  res.status(statusCode).render("error", { message });
 });
 
 app.listen(3000, () => {
