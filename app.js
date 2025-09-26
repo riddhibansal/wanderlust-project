@@ -1,5 +1,6 @@
 require('dotenv').config();
-console.log(process.env.SECRET)
+console.log(process.env.SECRET);
+
 
 const express = require("express");
 const app = express();
@@ -12,6 +13,7 @@ const listingRouter = require("./routes/listing.js");
 const reviewRouter = require("./routes/review.js");
 const userRouter = require("./routes/user.js");
 
+
 const dbUrl = process.env.ATLASDB_URL;
 //const MONGO_URL = "mongodb://127.0.0.1:27017/wanderlust";
 const session = require("express-session");
@@ -21,6 +23,7 @@ const passport = require("passport");
 const LocalStrategy = require("passport-local");
 const User = require("./models/user.js");
 
+
 main()
   .then(() => {
     console.log("connected to db");
@@ -29,9 +32,11 @@ main()
     console.log(err);
   });
 
+
 async function main() {
   await mongoose.connect(dbUrl);
 }
+
 
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
@@ -39,6 +44,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride("_method"));
 app.engine("ejs", ejsMate);
 app.use(express.static(path.join(__dirname, "/public")));
+
 
 const store = MongoStore.create({
   mongoUrl: dbUrl,
@@ -48,9 +54,11 @@ const store = MongoStore.create({
   touchAfter: 24 * 3600,
 });
 
-store.on("error", () => {
+
+store.on("error", (err) => {
   console.log("ERROR in MONGO SESSION STORE", err);
 });
+
 
 const sessionOptions = {
   store,
@@ -60,19 +68,20 @@ const sessionOptions = {
   cookie: {
     expires: Date.now() + 7 * 24 * 60 * 1000,
     maxAge: 7 * 24 * 60 * 1000,
-    httpOnly: true
-  }
+    httpOnly: true,
+  },
 };
 
 
-
-//MIDDLEWARES
+// MIDDLEWARES
 app.use(session(sessionOptions));
 app.use(flash());
 
+
 app.use(passport.initialize());
-app.use(passport.session()); //used to help sign in a user in multiple pages 
+app.use(passport.session());
 passport.use(new LocalStrategy(User.authenticate()));
+
 
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
@@ -85,19 +94,29 @@ app.use((req, res, next) => {
   next();
 });
 
+
 app.use("/listings", listingRouter);
 app.use("/listings/:id/reviews", reviewRouter);
 app.use("/", userRouter);
+
+
+// Root route: redirect to /listings to avoid 404 on homepage
+app.get("/", (req, res) => {
+  res.redirect("/listings");
+});
+
 
 app.all("*", (req, res, next) => {
   next(new ExpressError("Page not Found!", 404));
 });
 
-//ERROR HANDLER MIDDLEWARE 
+
+// ERROR HANDLER MIDDLEWARE 
 app.use((err, req, res, next) => {
-  let {statuscode=500, message="Something went wrong!"} = err;
-  res.render("error.ejs", { message });
+  let { statusCode = 500, message = "Something went wrong!" } = err;
+  res.status(statusCode).render("error", { message });
 });
+
 
 app.listen(3000, () => {
   console.log("working");
